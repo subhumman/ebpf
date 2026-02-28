@@ -1,0 +1,26 @@
+CLANG ?= clang
+LLVM_STRIP ?= llvm-strip
+
+# Путь к исходникам
+SRC_DIR := src
+OUTPUT_DIR := ../target/bpf
+
+# Флаги компиляции
+CFLAGS := -g -O2 -target bpf -D__TARGET_ARCH_x86_64
+
+# Целевой файл
+TARGET := $(OUTPUT_DIR)/secure_agent.bpf.o
+
+all: $(TARGET)
+
+$(OUTPUT_DIR):
+	mkdir -p $(OUTPUT_DIR)
+
+$(TARGET): $(SRC_DIR)/main.c $(SRC_DIR)/common.h $(SRC_DIR)/handlers.c $(SRC_DIR)/vmlinux.h | $(OUTPUT_DIR)
+	$(CLANG) $(CFLAGS) -I$(SRC_DIR) -c $< -o $@
+	$(LLVM_STRIP) -g $@
+
+clean:
+	rm -rf $(OUTPUT_DIR)
+
+.PHONY: all clean
